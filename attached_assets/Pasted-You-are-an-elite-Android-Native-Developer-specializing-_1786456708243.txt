@@ -1,0 +1,156 @@
+You are an elite Android Native Developer specializing in Kotlin, XML layouts, Material Design 3, and automated Supabase Backend Architecture.
+
+Build a complete, fully functional, production-ready Android Native Application with zero missing code, no TODO placeholders, and clean MVVM architecture based on the specifications below.
+
+==================================================
+1. APP METADATA & ENVIRONMENT
+==================================================
+- App Name: Elite eSports
+- Package Name: com.elite.esports.android
+- Version Code: 1
+- Version Name: 1.0.0
+- Target Platform: Android Native Only (Min SDK 24 / Android 7.0+)
+- Primary Stack: Kotlin, XML, ViewBinding / DataBinding, Coroutines, Flow, Material Design 3.
+- Backend Stack: Supabase (PostgreSQL, Supabase Auth, Row Level Security - RLS, Storage Buckets, Realtime DB).
+
+==================================================
+2. BACKEND AUTOMATION & SETUP INSTRUCTIONS
+==================================================
+- Programmatically auto-configure the Supabase DB schema, storage buckets, and Auth settings during initial initialization using the provided Supabase Service Role Key & API URL.
+- Enable Row Level Security (RLS) across all created SQL tables to prevent unauthorized data access.
+- Setup Storage Buckets:
+  1. `banners`: Public access for match/event promotional banners.
+  2. `proofs`: Private write access for payment & withdrawal verification screenshots.
+
+==================================================
+3. LEGAL COMPLIANCE & ACCESSIBILITY REQUIREMENTS
+==================================================
+- STRICT AGE GATE: Users MUST be 18 years or older to register and join tournaments. Calculate user age dynamically from Date of Birth.
+- PUBLIC LEGAL PAGES (NO AUTH REQUIRED):
+  - TermsAndConditionsActivity.kt & PrivacyPolicyActivity.kt must be globally accessible without any login guard/token requirement.
+  - Include explicit Skill-Based Gaming Disclaimers, Geo-Restriction clauses (restricting prohibited jurisdictions), and Limited Liability Company (LLC) indemnification against publisher game bans or peer-to-peer disputes.
+- TWO MANDATORY CHECKBOXES AT SIGNUP:
+  [ ] "I agree to the Terms & Conditions and confirm I am at least 18 years old."
+  [ ] "I accept the Privacy Policy and Fair Play Rules."
+  (Submit button remains disabled until both are checked and clicked links open the respective legal pages).
+
+==================================================
+4. AUTHENTICATION & USER ONBOARDING
+==================================================
+- Step 1: Signup Screen (Full Name, Email, DOB [18+ validation], Password, Confirm Password, Google Sign-In, 2 Legal Checkboxes).
+- Step 2: OTP Verification Screen (8-digit email OTP verification using Supabase Auth).
+- Step 3: In-Game Setup Screen (In-Game Name - IGN, Player UID, preferred Game type e.g., Free Fire / BGMI).
+
+==================================================
+5. USER APP REQUIREMENTS
+==================================================
+- Home: Browse matches with filters (All, Solo, Duo, Squad), view match cards (banner, title, entry fee, prize pool, slots filled/total, match time, rules dialog).
+- My Matches: Tabs for Upcoming, Ongoing, Completed. Realtime Room ID & Password display with a 1-tap Copy to Clipboard button once published by Admin.
+- Wallet:
+  - Deposit via UPI (Dynamic QR Code generation or UPI Intent integration with UTR transaction ID submission).
+  - Withdrawal via UPI ID or Google Play Gift Card code request.
+  - Full transactional history (Credit, Debit, Pending, Approved, Rejected).
+- Leaderboard: Realtime Weekly and Monthly rankings based on total winnings and kill points.
+- Profile: Manage IGN & UID (to protect players from being kicked out of custom rooms), update avatar, view account statistics.
+- Settings:
+  - App Theme (Light/Dark/System default).
+  - 2-Factor Authentication (2FA) toggle & Password Reset flow.
+  - Legal & Info Pages: Terms & Conditions, Privacy Policy, About Platform.
+  - Customer Support links (Direct WhatsApp, Telegram, Instagram launcher).
+  - Report / Complain Issue form (Submit bugs directly to the Admin Panel).
+
+==================================================
+6. ADMIN APP PANEL REQUIREMENTS (ROLE-BASED CONTROL)
+==================================================
+- Admin Gate: Check `profiles.is_admin == true` before loading Admin Dashboard.
+- Dashboard: Realtime analytics metrics (Total Users, Active Matches, Ongoing Matches, Platform Income, Open Complaints).
+- User Management: Search users, view complete profile & IGN/UID, Suspend, Unsuspend, Ban, Unban, Terminate, or manually Add/Deduct Wallet Funds.
+- Match Management:
+  - Create, Edit, or Delete Matches.
+  - Upload Match Banners directly to Supabase Storage bucket.
+  - Update Status: Upcoming -> Ongoing -> Played.
+  - Publish Room ID & Password securely to joined players only.
+  - One-Click Prize Distribution: Declare 1st, 2nd, 3rd place & kill rewards; auto-credit winner wallets instantly via SQL transactions.
+- Payment Management: Review deposit/withdrawal requests, view uploaded payment screenshots, One-Tap Approve or Reject with dynamic reason text.
+- Reports & Complaints: View user complaints, mark as Pending, Resolved, or Rejected.
+
+==================================================
+7. DATABASE SCHEMA (AUTO-GENERATE SQL VIA SUPABASE)
+==================================================
+```sql
+-- Profiles Table
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    dob DATE NOT NULL,
+    ign TEXT,
+    game_uid TEXT,
+    is_admin BOOLEAN DEFAULT FALSE,
+    wallet_balance NUMERIC DEFAULT 0.00,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Matches Table
+CREATE TABLE IF NOT EXISTS public.matches (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    title TEXT NOT NULL,
+    match_type TEXT NOT NULL, -- Solo, Duo, Squad
+    entry_fee NUMERIC DEFAULT 0.00,
+    prize_pool NUMERIC DEFAULT 0.00,
+    per_kill NUMERIC DEFAULT 0.00,
+    match_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    slots_total INT NOT NULL,
+    slots_filled INT DEFAULT 0,
+    room_id TEXT,
+    room_password TEXT,
+    status TEXT DEFAULT 'upcoming', -- upcoming, ongoing, completed
+    banner_url TEXT,
+    rules TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Match Participants Table
+CREATE TABLE IF NOT EXISTS public.match_participants (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    match_id UUID REFERENCES public.matches(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    ign TEXT NOT NULL,
+    game_uid TEXT NOT NULL,
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(match_id, user_id)
+);
+
+-- Transactions Table
+CREATE TABLE IF NOT EXISTS public.transactions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    type TEXT NOT NULL, -- DEPOSIT, WITHDRAWAL, MATCH_FEE, PRIZE_WINNING
+    amount NUMERIC NOT NULL,
+    payment_method TEXT, -- UPI, GOOGLE_PLAY_CARD
+    utr_number TEXT,
+    proof_url TEXT,
+    status TEXT DEFAULT 'PENDING', -- PENDING, APPROVED, REJECTED
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Reports Table
+CREATE TABLE IF NOT EXISTS public.reports (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'OPEN', -- OPEN, RESOLVED, REJECTED
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+
+==================================================
+8. DELIVERABLE SPECIFICATIONS
+
+
+Provide full, production-ready Kotlin code for all Activities, ViewModels, Repositories, and Supabase client helpers.
+
+Provide complete XML layout files with clean constraints, Material3 styling, and proper ID naming conventions.
+
+Ensure proper Exception Handling, offline state detection, loading progress bars, and informative Toasts for all network/database interactions. 
