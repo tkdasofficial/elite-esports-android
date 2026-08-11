@@ -34,7 +34,7 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The product is a native Android mobile app experience, not a desktop dashboard; prioritize portrait phone layouts and touch-first interactions.
 
 ## Gotchas
 
