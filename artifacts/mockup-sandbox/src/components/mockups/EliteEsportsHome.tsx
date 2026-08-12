@@ -8,12 +8,16 @@ import {
   Clock3,
   Edit3,
   Gamepad2,
+  Headphones,
   Home,
+  Info,
   LayoutGrid,
   LockKeyhole,
   Plus,
   Search,
+  Settings,
   ShieldCheck,
+  FileText,
   SlidersHorizontal,
   Trophy,
   UserRound,
@@ -25,6 +29,7 @@ import {
 type MatchMode = "Solo" | "Duo" | "Squad";
 type Filter = "All" | "Free Fire" | "BGMI" | MatchMode;
 type Page = "Home" | "Matches" | "Wallet" | "Leaderboard";
+type ProfilePage = "menu" | "account" | "game" | "settings" | "support" | "terms" | "privacy" | "about";
 
 type Match = {
   id: number;
@@ -364,6 +369,243 @@ function LeaderboardPage() {
   );
 }
 
+function ProfileScreen({
+  page,
+  onBack,
+  onNavigate,
+  onToast,
+}: {
+  page: ProfilePage;
+  onBack: () => void;
+  onNavigate: (page: ProfilePage) => void;
+  onToast: (message: string) => void;
+}) {
+  const pageCopy: Record<Exclude<ProfilePage, "menu">, { eyebrow: string; title: string; subtitle: string }> = {
+    account: {
+      eyebrow: "ACCOUNT",
+      title: "Account settings",
+      subtitle: "Keep your personal details and security up to date.",
+    },
+    game: {
+      eyebrow: "PLAYER IDENTITY",
+      title: "In-game details",
+      subtitle: "Your verified identity is used when you join custom rooms.",
+    },
+    settings: {
+      eyebrow: "PREFERENCES",
+      title: "Settings",
+      subtitle: "Control your app experience and account security.",
+    },
+    support: {
+      eyebrow: "WE ARE HERE",
+      title: "Contact support",
+      subtitle: "Get help with entries, payouts, rooms, or account access.",
+    },
+    terms: {
+      eyebrow: "LEGAL",
+      title: "Terms & conditions",
+      subtitle: "The rules that keep every Elite match fair.",
+    },
+    privacy: {
+      eyebrow: "LEGAL",
+      title: "Privacy policy",
+      subtitle: "How Elite eSports handles your account information.",
+    },
+    about: {
+      eyebrow: "ELITE ESPORTS",
+      title: "About the platform",
+      subtitle: "A skill-first arena built for competitive mobile players.",
+    },
+  };
+
+  const Row = ({
+    icon: Icon,
+    label,
+    detail,
+    target,
+  }: {
+    icon: typeof UserRound;
+    label: string;
+    detail: string;
+    target: ProfilePage;
+  }) => (
+    <button
+      type="button"
+      onClick={() => onNavigate(target)}
+      className="flex w-full items-center gap-3 border-b border-[#293034] py-3.5 text-left last:border-0"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#242c2f] text-[#ff7040]">
+        <Icon size={16} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <strong className="block text-[12px] font-bold text-[#e8e1d8]">{label}</strong>
+        <span className="mt-1 block truncate text-[9px] text-[#7f8b8e]">{detail}</span>
+      </span>
+      <ChevronRight size={16} className="text-[#748084]" />
+    </button>
+  );
+
+  if (page === "menu") {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-5 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"
+        >
+          <ChevronLeft size={16} /> Back to home
+        </button>
+        <section className="rounded-[22px] border border-[#4b3025] bg-[#211916] p-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#d8a04f] text-[20px] font-extrabold text-[#281c12]">
+              R
+            </span>
+            <div>
+              <h1 className="text-[21px] font-extrabold tracking-[-0.05em] text-[#fbf6ef]">Rohan Shah</h1>
+              <p className="mt-1 text-[10px] text-[#b39f91]">@rohan.shah · Level 18</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate("account")}
+            className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#624333] text-[11px] font-bold text-[#e0c8b7]"
+          >
+            <Edit3 size={14} /> Edit profile
+          </button>
+        </section>
+
+        <section className="mt-4 rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
+          <p className="pt-4 text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">Account</p>
+          <Row icon={UserRound} label="Account settings" detail="Name, email, date of birth, security" target="account" />
+          <Row icon={Gamepad2} label="In-game details" detail="IGN, player UID, preferred game" target="game" />
+        </section>
+
+        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
+          <p className="pt-4 text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">App & help</p>
+          <Row icon={Settings} label="Settings" detail="Theme, notifications, password, 2FA" target="settings" />
+          <Row icon={Headphones} label="Contact support" detail="WhatsApp, Telegram, report an issue" target="support" />
+          <Row icon={Info} label="About platform" detail="Fair play, skill-based gaming, version 1.0.0" target="about" />
+        </section>
+
+        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
+          <p className="pt-4 text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">Legal</p>
+          <Row icon={FileText} label="Terms & conditions" detail="Match rules, age gate, jurisdiction clauses" target="terms" />
+          <Row icon={ShieldCheck} label="Privacy policy" detail="Your data, storage, and account controls" target="privacy" />
+        </section>
+
+        <button
+          type="button"
+          onClick={() => onToast("Log out is ready for the connected account.")}
+          className="mt-4 flex h-11 w-full items-center justify-center rounded-xl border border-[#4a3431] text-[11px] font-bold text-[#dd9d91]"
+        >
+          Log out
+        </button>
+      </div>
+    );
+  }
+
+  const copy = pageCopy[page];
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => onNavigate("menu")}
+        className="mb-5 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"
+      >
+        <ChevronLeft size={16} /> Profile
+      </button>
+      <PageTitle eyebrow={copy.eyebrow} title={copy.title} subtitle={copy.subtitle} />
+
+      {page === "account" && (
+        <div className="mt-5 space-y-3">
+          <section className="rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+            {[
+              ["Full name", "Rohan Shah"],
+              ["Email address", "rohan.shah@email.com"],
+              ["Date of birth", "12 March 2001 · 25+ verified"],
+            ].map(([label, value]) => (
+              <div key={label} className="border-b border-[#293034] py-3 first:pt-0 last:border-0 last:pb-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#788487]">{label}</p>
+                <p className="mt-1 text-[12px] font-semibold text-[#e0d9d1]">{value}</p>
+              </div>
+            ))}
+          </section>
+          <section className="rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+            <div className="flex items-center justify-between">
+              <div><p className="text-[12px] font-bold text-[#e8e1d8]">Two-factor authentication</p><p className="mt-1 text-[9px] text-[#7f8b8e]">Extra protection for wallet actions</p></div>
+              <span className="rounded-full bg-[#1f2b24] px-2.5 py-1 text-[9px] font-bold text-[#9fc5a9]">Enabled</span>
+            </div>
+          </section>
+          <button type="button" onClick={() => onToast("Account changes are ready to save.")} className="h-11 w-full rounded-xl bg-[#ff5a1f] text-[11px] font-bold text-[#1b130f]">Save changes</button>
+        </div>
+      )}
+
+      {page === "game" && (
+        <div className="mt-5 space-y-3">
+          <section className="rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+            {[
+              ["In-game name (IGN)", "RohanOP"],
+              ["Player UID", "1849205612"],
+              ["Preferred game", "Free Fire"],
+            ].map(([label, value]) => (
+              <div key={label} className="border-b border-[#293034] py-3 first:pt-0 last:border-0 last:pb-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#788487]">{label}</p>
+                <p className="mt-1 text-[12px] font-semibold text-[#e0d9d1]">{value}</p>
+              </div>
+            ))}
+          </section>
+          <div className="flex items-center gap-2 rounded-xl bg-[#1f2b24] p-3 text-[10px] leading-4 text-[#a9c8b0]"><ShieldCheck size={15} className="shrink-0" />Your IGN and UID are shown to room admins so you are not removed from custom rooms.</div>
+          <button type="button" onClick={() => onToast("In-game details are ready to save.")} className="h-11 w-full rounded-xl bg-[#ff5a1f] text-[11px] font-bold text-[#1b130f]">Save in-game details</button>
+        </div>
+      )}
+
+      {page === "settings" && (
+        <div className="mt-5 space-y-3">
+          <section className="rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
+            {[
+              ["App theme", "Dark mode"],
+              ["Match reminders", "Notifications enabled"],
+              ["Two-factor authentication", "Enabled"],
+            ].map(([label, detail]) => (
+              <button key={label} type="button" onClick={() => onToast(`${label} controls are ready.`)} className="flex w-full items-center justify-between border-b border-[#293034] py-4 text-left last:border-0">
+                <span><strong className="block text-[12px] text-[#e4ded6]">{label}</strong><span className="mt-1 block text-[9px] text-[#7f8b8e]">{detail}</span></span>
+                <ChevronRight size={16} className="text-[#748084]" />
+              </button>
+            ))}
+          </section>
+          <button type="button" onClick={() => onToast("Password reset link sent to your email.")} className="flex h-11 w-full items-center justify-center rounded-xl border border-[#3b4549] text-[11px] font-bold text-[#b9c2bf]">Reset password</button>
+        </div>
+      )}
+
+      {page === "support" && (
+        <div className="mt-5 space-y-3">
+          {[
+            [Headphones, "Chat with support", "Get help with a match or payment", "Open WhatsApp"],
+            [Gamepad2, "Community help", "Join the verified Elite Telegram", "Open Telegram"],
+            [ShieldCheck, "Report an issue", "Send a complaint directly to admins", "Create report"],
+          ].map(([Icon, label, detail, action]) => (
+            <button key={String(label)} type="button" onClick={() => onToast(`${String(action)} is ready.`)} className="flex w-full items-center gap-3 rounded-[19px] border border-[#2b3236] bg-[#171c1f] p-4 text-left">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ff5a1f]/12 text-[#ff7040]"><Icon size={17} /></span>
+              <span className="min-w-0 flex-1"><strong className="block text-[12px] text-[#e5ded6]">{String(label)}</strong><span className="mt-1 block text-[9px] text-[#7f8b8e]">{String(detail)}</span></span>
+              <ChevronRight size={16} className="text-[#748084]" />
+            </button>
+          ))}
+          <div className="rounded-xl bg-[#1f2b24] p-3 text-[10px] leading-4 text-[#a9c8b0]">Support is available daily from 9:00 AM to 11:00 PM IST.</div>
+        </div>
+      )}
+
+      {(page === "terms" || page === "privacy" || page === "about") && (
+        <section className="mt-5 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+          {page === "terms" && <><h2 className="text-[14px] font-bold text-[#f2ece4]">Play fair. Get paid clearly.</h2><p className="mt-3 text-[11px] leading-5 text-[#a0aaaa]">Elite eSports is a skill-based gaming platform for players aged 18 and above. By joining a match, you agree to follow the published rules, use an approved device, and provide accurate in-game details.</p><p className="mt-3 text-[11px] leading-5 text-[#a0aa2] text-[#a0aaaa]">Matches and payouts may be restricted in prohibited jurisdictions. Elite eSports is not responsible for publisher bans, device issues, or peer-to-peer disputes outside the platform.</p><div className="mt-4 rounded-xl bg-[#1f2b24] p-3 text-[10px] leading-4 text-[#a9c8b0]"><ShieldCheck size={14} className="mb-1" />Fair-play violations can result in removal, wallet review, or account suspension.</div></>}
+          {page === "privacy" && <><h2 className="text-[14px] font-bold text-[#f2ece4]">Your data stays in your control.</h2><p className="mt-3 text-[11px] leading-5 text-[#a0aaaa]">We use your account details, date of birth, payment references, and in-game identity to verify eligibility, protect matches, process payouts, and provide support.</p><p className="mt-3 text-[11px] leading-5 text-[#a0aaaa]">Payment proofs are kept private and are visible only to authorized review staff. You can request account support or data access from the support team.</p></>}
+          {page === "about" && <><h2 className="text-[14px] font-bold text-[#f2ece4]">Built for the next clutch.</h2><p className="mt-3 text-[11px] leading-5 text-[#a0aaaa]">Elite eSports brings verified skill-based tournaments, transparent prize pools, and protected wallet payouts to mobile gamers.</p><div className="mt-4 grid grid-cols-2 gap-2"><div className="rounded-xl bg-[#131719] p-3"><p className="text-[9px] uppercase tracking-[0.1em] text-[#788487]">Version</p><p className="mt-1 text-[12px] font-bold text-[#e4ded6]">1.0.0</p></div><div className="rounded-xl bg-[#131719] p-3"><p className="text-[9px] uppercase tracking-[0.1em] text-[#788487]">Players</p><p className="mt-1 text-[12px] font-bold text-[#e4ded6]">18+ only</p></div></div></>}
+        </section>
+      )}
+    </div>
+  );
+}
+
 export function EliteEsportsHome() {
   const [filter, setFilter] = useState<Filter>("All");
   const [joined, setJoined] = useState<number[]>([]);
@@ -377,6 +619,7 @@ export function EliteEsportsHome() {
   const [managedFilters, setManagedFilters] = useState(initialManagedFilters);
   const [advancedGame, setAdvancedGame] = useState("Any game");
   const [advancedEntry, setAdvancedEntry] = useState("Any entry fee");
+  const [profilePage, setProfilePage] = useState<ProfilePage | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -407,7 +650,7 @@ export function EliteEsportsHome() {
     <div className="min-h-screen bg-[#0b0e10] text-[#f4efe8]" style={{ fontFamily: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif" }}>
       <div className="mx-auto min-h-screen w-full max-w-[430px] overflow-hidden bg-[#101416] shadow-2xl">
         <header className="flex h-[72px] items-center justify-between border-b border-[#252c30] px-5">
-          <button type="button" onClick={() => setActiveNav("Home")} className="flex items-center gap-2.5">
+          <button type="button" onClick={() => { setProfilePage("menu"); setSelectedMatch(null); }} className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d8a04f] text-[13px] font-extrabold text-[#281c12]">R</span>
             <span className="text-[14px] font-bold tracking-[-0.03em] text-[#f4efe8]">Rohan</span>
           </button>
@@ -422,7 +665,14 @@ export function EliteEsportsHome() {
         </header>
 
         <main className="px-4 pb-28 pt-5">
-          {selectedMatch ? (
+          {profilePage ? (
+            <ProfileScreen
+              page={profilePage}
+              onBack={() => setProfilePage(null)}
+              onNavigate={setProfilePage}
+              onToast={setToast}
+            />
+          ) : selectedMatch ? (
             <div>
               <button type="button" onClick={() => setSelectedMatch(null)} className="mb-5 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"><ChevronLeft size={16} /> Back to matches</button>
               <div className="flex items-start gap-3">
