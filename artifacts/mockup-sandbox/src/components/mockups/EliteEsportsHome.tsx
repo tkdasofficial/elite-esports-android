@@ -30,7 +30,7 @@ type MatchMode = "Solo" | "Duo" | "Squad";
 type Filter = "All" | "Free Fire" | "BGMI" | MatchMode;
 type Page = "Home" | "Matches" | "Wallet" | "Leaderboard";
 type ProfilePage = "menu" | "account" | "game" | "settings" | "support" | "terms" | "privacy" | "about";
-type DetailTab = "Players" | "Prize distribution" | "Rules";
+type DetailTab = "Players" | "Prize Pool" | "Rules";
 
 type Match = {
   id: number;
@@ -265,9 +265,12 @@ function MatchCard({
               </p>
             </div>
           </div>
-          <div className="mt-auto flex items-center gap-1 text-[9px] text-[#929d9f]">
-            <CalendarDays size={11} className="text-[#788487]" />
-            {match.time}
+          <div className="mt-auto flex items-center gap-2 rounded-lg border border-[#3a302b] bg-[#211b19] px-2.5 py-1.5">
+            <CalendarDays size={13} className="shrink-0 text-[#ff7040]" />
+            <div className="min-w-0">
+              <p className="text-[7px] font-bold uppercase tracking-[0.12em] text-[#907d73]">Match date & time</p>
+              <p className="mt-0.5 truncate text-[10px] font-bold text-[#e9ded4]">{match.time}</p>
+            </div>
           </div>
         </div>
 
@@ -629,8 +632,7 @@ function MatchDetails({
   onJoin: (match: Match) => void;
 }) {
   const [tab, setTab] = useState<DetailTab>("Players");
-  const [showTabFilter, setShowTabFilter] = useState(false);
-  const tabs: DetailTab[] = ["Players", "Prize distribution", "Rules"];
+  const tabs: DetailTab[] = ["Players", "Prize Pool", "Rules"];
   const players = [
     ["Rohan Shah", "RohanOP", "You", "RS"],
     ["ArjunKiller", "ARJUN999", "Verified", "AK"],
@@ -641,12 +643,9 @@ function MatchDetails({
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex items-center">
         <button type="button" onClick={onBack} className="flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]">
           <ChevronLeft size={16} /> Back to matches
-        </button>
-        <button type="button" onClick={() => setShowTabFilter(true)} className="flex h-9 items-center gap-1.5 rounded-xl border border-[#343e42] px-3 text-[10px] font-bold text-[#aeb7b6]">
-          <SlidersHorizontal size={13} /> Filter view
         </button>
       </div>
 
@@ -655,17 +654,24 @@ function MatchDetails({
         <div className="min-w-0">
           <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#ff7040]">{match.game} · {match.mode}</p>
           <h1 className="mt-1.5 text-[21px] font-extrabold leading-6 tracking-[-0.05em] text-[#f5f0e9]">{match.title}</h1>
-          <p className="mt-2 flex items-center gap-1.5 text-[10px] text-[#8d999b]"><CalendarDays size={12} />{match.time}</p>
         </div>
+      </div>
+      <div className="mt-4 flex items-center gap-3 rounded-xl border border-[#4b3329] bg-[#241916] px-3.5 py-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#ff5a1f]/12 text-[#ff7040]"><CalendarDays size={17} /></span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-[#a28474]">Match date & time</p>
+          <p className="mt-1 truncate text-[12px] font-extrabold text-[#f3e9df]">{match.time}</p>
+        </div>
+        <span className="shrink-0 rounded-full bg-[#34241f] px-2 py-1 text-[8px] font-bold text-[#ff9b70]">{match.countdown}</span>
       </div>
       <button type="button" onClick={() => onJoin(match)} className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[12px] font-bold ${joined ? "bg-[#d8efdd] text-[#17442d]" : "bg-[#ff5a1f] text-[#1a120e]"}`}>
         {joined ? <ShieldCheck size={15} /> : <Zap size={15} />}
         {joined ? "Spot reserved" : `Join for ₹${match.entry}`}
       </button>
 
-      <div className="mt-5 flex gap-1 overflow-x-auto rounded-xl bg-[#171d20] p-1 [scrollbar-width:none]">
+      <div className="mt-5 grid grid-cols-3 gap-1 rounded-xl bg-[#171d20] p-1">
         {tabs.map((item) => (
-          <button key={item} type="button" onClick={() => setTab(item)} className={`shrink-0 rounded-lg px-3 py-2.5 text-[10px] font-bold transition ${tab === item ? "bg-[#ff5a1f] text-[#1b130f]" : "text-[#849094]"}`}>
+          <button key={item} type="button" onClick={() => setTab(item)} className={`w-full rounded-lg px-1 py-2.5 text-center text-[10px] font-bold transition ${tab === item ? "bg-[#ff5a1f] text-[#1b130f]" : "text-[#849094]"}`}>
             {item}
           </button>
         ))}
@@ -687,13 +693,13 @@ function MatchDetails({
               </div>
             ))}
           </div>
-          <button type="button" onClick={() => setShowTabFilter(true)} className="mt-3 flex w-full items-center justify-center gap-1 text-[10px] font-bold text-[#ff7040]">View all {match.filled} players <ChevronRight size={13} /></button>
+          <div className="mt-3 text-center text-[10px] font-semibold text-[#7f8b8e]">Showing verified players in this room</div>
         </section>
       )}
 
-      {tab === "Prize distribution" && (
+      {tab === "Prize Pool" && (
         <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
-          <div className="flex items-center justify-between"><div><h2 className="text-[14px] font-bold text-[#f2ece4]">Prize distribution</h2><p className="mt-1 text-[9px] text-[#7f8b8e]">Total pool · <Money value={match.prize} /></p></div><Trophy size={19} className="text-[#efb24f]" /></div>
+          <div className="flex items-center justify-between"><div><h2 className="text-[14px] font-bold text-[#f2ece4]">Prize pool</h2><p className="mt-1 text-[9px] text-[#7f8b8e]">Total pool · <Money value={match.prize} /></p></div><Trophy size={19} className="text-[#efb24f]" /></div>
           <div className="mt-4 space-y-2">
             {[
               ["1st place", "₹900", "50%"],
@@ -718,14 +724,6 @@ function MatchDetails({
         </section>
       )}
 
-      {showTabFilter && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-[#07090a]/75 p-0 backdrop-blur-sm" onClick={() => setShowTabFilter(false)}>
-          <div className="w-full max-w-[430px] rounded-t-[26px] border border-[#3a4245] bg-[#181d20] p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">DETAIL FILTER</p><h2 className="mt-1.5 text-[20px] font-bold tracking-[-0.04em] text-[#f5f0e8]">Show section</h2></div><button type="button" onClick={() => setShowTabFilter(false)} className="rounded-lg p-2 text-[#8c9697]"><X size={18} /></button></div>
-            <div className="mt-4 space-y-2">{tabs.map((item) => <button key={item} type="button" onClick={() => { setTab(item); setShowTabFilter(false); }} className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-[11px] font-bold ${tab === item ? "border-[#ff5a1f] bg-[#ff5a1f]/10 text-[#ff7040]" : "border-[#343e42] bg-[#121719] text-[#c4ccc9]"}`}>{item}{tab === item && <ShieldCheck size={14} />}</button>)}</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -828,13 +826,13 @@ export function EliteEsportsHome() {
 
         {profilePage && (
           <div
-            className="fixed inset-0 z-50 flex justify-end bg-[#07090a]/72 backdrop-blur-[2px]"
+            className="fixed inset-0 z-50 flex justify-start bg-[#07090a]/72 backdrop-blur-[2px]"
             onClick={() => setProfilePage(null)}
           >
             <aside
               role="dialog"
               aria-label="Profile menu"
-              className="h-full w-[min(92vw,390px)] overflow-hidden border-l border-[#343e42] bg-[#121719] shadow-[-18px_0_45px_rgba(0,0,0,0.35)]"
+              className="h-full w-[min(92vw,390px)] overflow-hidden border-r border-[#343e42] bg-[#121719] shadow-[18px_0_45px_rgba(0,0,0,0.35)]"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex h-[72px] items-center justify-between border-b border-[#293034] px-5">
