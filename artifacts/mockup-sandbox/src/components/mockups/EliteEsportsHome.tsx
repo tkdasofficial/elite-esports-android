@@ -325,7 +325,7 @@ function PageTitle({
 
 function WalletPage() {
   return (
-    <div className="space-y-4">
+      <div className="space-y-5">
       <PageTitle eyebrow="YOUR FUNDS" title="Wallet" subtitle="Manage entries, winnings, and withdrawals." />
       <section className="rounded-[21px] border border-[#4b3025] bg-[#211916] p-5">
         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#b89580]">Available balance</p>
@@ -366,8 +366,8 @@ function LeaderboardPage() {
     <div>
       <PageTitle eyebrow="THE ARENA" title="Leaderboard" subtitle="Weekly rankings based on winnings and kill points." />
       <div className="mt-5 flex gap-2 rounded-xl bg-[#171d20] p-1">
-        <button type="button" className="h-9 flex-1 rounded-lg bg-[#ff5a1f] text-[11px] font-bold text-[#1b130f]">This week</button>
-        <button type="button" className="h-9 flex-1 rounded-lg text-[11px] font-bold text-[#7f8b8e]">This month</button>
+        <button type="button" className="h-10 flex-1 rounded-lg bg-[#ff5a1f] text-[11px] font-bold text-[#1b130f]">This week</button>
+        <button type="button" className="h-10 flex-1 rounded-lg text-[11px] font-bold text-[#7f8b8e]">This month</button>
       </div>
       <section className="mt-4 overflow-hidden rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
         {players.map(([rank, name, winnings, points]) => (
@@ -465,9 +465,9 @@ function ProfileScreen({
         <button
           type="button"
           onClick={onBack}
-          className="mb-5 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"
+          className="mb-4 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"
         >
-          <ChevronLeft size={16} /> Back to home
+          <ChevronLeft size={16} /> Close drawer
         </button>
         <section className="rounded-[22px] border border-[#4b3025] bg-[#211916] p-5">
           <div className="flex items-center gap-3">
@@ -482,7 +482,7 @@ function ProfileScreen({
           <button
             type="button"
             onClick={() => onNavigate("account")}
-            className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#624333] text-[11px] font-bold text-[#e0c8b7]"
+            className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#624333] text-[11px] font-bold text-[#e0c8b7] transition hover:bg-[#2a1e1a]"
           >
             <Edit3 size={14} /> Edit profile
           </button>
@@ -494,14 +494,14 @@ function ProfileScreen({
           <Row icon={Gamepad2} label="In-game details" detail="IGN, player UID, preferred game" target="game" />
         </section>
 
-        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
+        <section className="mt-4 overflow-hidden rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
           <p className="pt-4 text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">App & help</p>
           <Row icon={Settings} label="Settings" detail="Theme, notifications, password, 2FA" target="settings" />
           <Row icon={Headphones} label="Contact support" detail="WhatsApp, Telegram, report an issue" target="support" />
           <Row icon={Info} label="About platform" detail="Fair play, skill-based gaming, version 1.0.0" target="about" />
         </section>
 
-        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
+        <section className="mt-4 overflow-hidden rounded-[21px] border border-[#2b3236] bg-[#171c1f] px-4">
           <p className="pt-4 text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">Legal</p>
           <Row icon={FileText} label="Terms & conditions" detail="Match rules, age gate, jurisdiction clauses" target="terms" />
           <Row icon={ShieldCheck} label="Privacy policy" detail="Your data, storage, and account controls" target="privacy" />
@@ -510,7 +510,7 @@ function ProfileScreen({
         <button
           type="button"
           onClick={() => onToast("Log out is ready for the connected account.")}
-          className="mt-4 flex h-11 w-full items-center justify-center rounded-xl border border-[#4a3431] text-[11px] font-bold text-[#dd9d91]"
+          className="mt-5 flex h-11 w-full items-center justify-center rounded-xl border border-[#4a3431] text-[11px] font-bold text-[#dd9d91] transition hover:bg-[#261c1d]"
         >
           Log out
         </button>
@@ -525,7 +525,7 @@ function ProfileScreen({
       <button
         type="button"
         onClick={() => onNavigate("menu")}
-        className="mb-5 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"
+        className="mb-4 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"
       >
         <ChevronLeft size={16} /> Profile
       </button>
