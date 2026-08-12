@@ -30,6 +30,7 @@ type MatchMode = "Solo" | "Duo" | "Squad";
 type Filter = "All" | "Free Fire" | "BGMI" | MatchMode;
 type Page = "Home" | "Matches" | "Wallet" | "Leaderboard";
 type ProfilePage = "menu" | "account" | "game" | "settings" | "support" | "terms" | "privacy" | "about";
+type DetailTab = "Players" | "Prize distribution" | "Rules";
 
 type Match = {
   id: number;
@@ -233,7 +234,17 @@ function MatchCard({
           <span className="mt-2.5 self-start rounded-md border border-[#3b4448] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-[#aab2b2]">
             {match.mode}
           </span>
-          <div className="mt-auto grid grid-cols-3 gap-1 border-t border-[#2a3034] pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-[9px] text-[#929d9f]">
+            <span className="flex items-center gap-1">
+              <Clock3 size={11} className="text-[#ff7140]" />
+              Starts in {match.countdown}
+            </span>
+            <span className="font-semibold text-[#b7bfbd]">{percent}% filled</span>
+          </div>
+          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[#2a3033]">
+            <div className="h-full rounded-full" style={{ width: `${percent}%`, backgroundColor: match.accent }} />
+          </div>
+          <div className="mt-2.5 grid grid-cols-3 gap-1 border-t border-[#2a3034] pt-2.5">
             <div>
               <p className="text-[8px] uppercase tracking-[0.08em] text-[#747f83]">Prize</p>
               <p className="mt-0.5 text-[12px] font-bold text-[#efb24f]">
@@ -254,8 +265,8 @@ function MatchCard({
               </p>
             </div>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-[9px] text-[#929d9f]">
-            <Clock3 size={11} className="text-[#ff7140]" />
+          <div className="mt-auto flex items-center gap-1 text-[9px] text-[#929d9f]">
+            <CalendarDays size={11} className="text-[#788487]" />
             {match.time}
           </div>
         </div>
@@ -606,6 +617,119 @@ function ProfileScreen({
   );
 }
 
+function MatchDetails({
+  match,
+  joined,
+  onBack,
+  onJoin,
+}: {
+  match: Match;
+  joined: boolean;
+  onBack: () => void;
+  onJoin: (match: Match) => void;
+}) {
+  const [tab, setTab] = useState<DetailTab>("Players");
+  const [showTabFilter, setShowTabFilter] = useState(false);
+  const tabs: DetailTab[] = ["Players", "Prize distribution", "Rules"];
+  const players = [
+    ["Rohan Shah", "RohanOP", "You", "RS"],
+    ["ArjunKiller", "ARJUN999", "Verified", "AK"],
+    ["MambaOP", "MAMBA07", "Verified", "MO"],
+    ["ClutchGod", "CLUTCHX", "Verified", "CG"],
+    ["ShadowV", "SHADOWV", "Verified", "SV"],
+  ];
+
+  return (
+    <div>
+      <div className="mb-5 flex items-center justify-between">
+        <button type="button" onClick={onBack} className="flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]">
+          <ChevronLeft size={16} /> Back to matches
+        </button>
+        <button type="button" onClick={() => setShowTabFilter(true)} className="flex h-9 items-center gap-1.5 rounded-xl border border-[#343e42] px-3 text-[10px] font-bold text-[#aeb7b6]">
+          <SlidersHorizontal size={13} /> Filter view
+        </button>
+      </div>
+
+      <div className="flex items-start gap-3">
+        <div className="w-[104px] shrink-0"><MatchArtwork match={match} /></div>
+        <div className="min-w-0">
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#ff7040]">{match.game} · {match.mode}</p>
+          <h1 className="mt-1.5 text-[21px] font-extrabold leading-6 tracking-[-0.05em] text-[#f5f0e9]">{match.title}</h1>
+          <p className="mt-2 flex items-center gap-1.5 text-[10px] text-[#8d999b]"><CalendarDays size={12} />{match.time}</p>
+        </div>
+      </div>
+      <button type="button" onClick={() => onJoin(match)} className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[12px] font-bold ${joined ? "bg-[#d8efdd] text-[#17442d]" : "bg-[#ff5a1f] text-[#1a120e]"}`}>
+        {joined ? <ShieldCheck size={15} /> : <Zap size={15} />}
+        {joined ? "Spot reserved" : `Join for ₹${match.entry}`}
+      </button>
+
+      <div className="mt-5 flex gap-1 overflow-x-auto rounded-xl bg-[#171d20] p-1 [scrollbar-width:none]">
+        {tabs.map((item) => (
+          <button key={item} type="button" onClick={() => setTab(item)} className={`shrink-0 rounded-lg px-3 py-2.5 text-[10px] font-bold transition ${tab === item ? "bg-[#ff5a1f] text-[#1b130f]" : "text-[#849094]"}`}>
+            {item}
+          </button>
+        ))}
+      </div>
+
+      {tab === "Players" && (
+        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+          <div className="flex items-center justify-between">
+            <div><h2 className="text-[14px] font-bold text-[#f2ece4]">Joined players</h2><p className="mt-1 text-[9px] text-[#7f8b8e]">Verified identities in this room</p></div>
+            <span className="rounded-full bg-[#1f2b24] px-2.5 py-1 text-[9px] font-bold text-[#9fc5a9]">{match.filled}/{match.total}</span>
+          </div>
+          <div className="mt-3 space-y-1">
+            {players.map(([name, ign, status, initials], index) => (
+              <div key={name} className="flex items-center gap-2.5 border-b border-[#293034] py-2.5 last:border-0">
+                <span className="w-4 text-center text-[9px] font-bold text-[#7f8b8e]">{index + 1}</span>
+                <span className={`flex h-8 w-8 items-center justify-center rounded-full text-[8px] font-extrabold ${status === "You" ? "bg-[#d8a04f] text-[#281c12]" : "bg-[#303b3f] text-[#dce3df]"}`}>{initials}</span>
+                <span className="min-w-0 flex-1"><strong className="block truncate text-[11px] text-[#e5ded6]">{name}</strong><span className="mt-0.5 block truncate text-[9px] text-[#778487]">{ign}</span></span>
+                <span className={`text-[9px] font-bold ${status === "You" ? "text-[#ff7040]" : "text-[#8fbd9b]"}`}>{status}</span>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={() => setShowTabFilter(true)} className="mt-3 flex w-full items-center justify-center gap-1 text-[10px] font-bold text-[#ff7040]">View all {match.filled} players <ChevronRight size={13} /></button>
+        </section>
+      )}
+
+      {tab === "Prize distribution" && (
+        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+          <div className="flex items-center justify-between"><div><h2 className="text-[14px] font-bold text-[#f2ece4]">Prize distribution</h2><p className="mt-1 text-[9px] text-[#7f8b8e]">Total pool · <Money value={match.prize} /></p></div><Trophy size={19} className="text-[#efb24f]" /></div>
+          <div className="mt-4 space-y-2">
+            {[
+              ["1st place", "₹900", "50%"],
+              ["2nd place", "₹540", "30%"],
+              ["3rd place", "₹360", "20%"],
+              ["Kill rewards", "Included", "₹40 / kill"],
+            ].map(([label, amount, share]) => (
+              <div key={label} className="flex items-center gap-3 rounded-xl bg-[#131719] px-3 py-3"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#ff5a1f]/12 text-[10px] font-bold text-[#ff7040]">{label === "Kill rewards" ? "K" : label.charAt(0)}</span><span className="flex-1"><strong className="block text-[11px] text-[#d9d2ca]">{label}</strong><span className="mt-0.5 block text-[9px] text-[#778487]">{share}</span></span><strong className="text-[12px] text-[#efb24f]">{amount}</strong></div>
+            ))}
+          </div>
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#1f2b24] p-3 text-[10px] leading-4 text-[#a9c8b0]"><ShieldCheck size={14} />Winnings are credited to your wallet after result verification.</div>
+        </section>
+      )}
+
+      {tab === "Rules" && (
+        <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
+          <div className="flex items-center gap-2"><CircleHelp size={15} className="text-[#ff7040]" /><h2 className="text-[14px] font-bold text-[#f2ece4]">Room rules</h2></div>
+          <div className="mt-4 space-y-2">
+            {["Room ID and password are shared 10 minutes before start.", "No teaming, emulators, or modified clients. Fair play is monitored.", "Top placements are paid to your Elite wallet within 30 minutes.", "Entry fees are non-refundable once the room is locked."].map((rule, index) => <div key={rule} className="flex gap-3 rounded-xl bg-[#131719] p-3 text-[10px] leading-4 text-[#aeb8b6]"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ff5a1f]/12 text-[9px] font-bold text-[#ff7040]">{index + 1}</span>{rule}</div>)}
+          </div>
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#1f2b24] p-3 text-[10px] text-[#a9c8b0]"><LockKeyhole size={14} />Fair play is monitored in every room.</div>
+        </section>
+      )}
+
+      {showTabFilter && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-[#07090a]/75 p-0 backdrop-blur-sm" onClick={() => setShowTabFilter(false)}>
+          <div className="w-full max-w-[430px] rounded-t-[26px] border border-[#3a4245] bg-[#181d20] p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#ff7040]">DETAIL FILTER</p><h2 className="mt-1.5 text-[20px] font-bold tracking-[-0.04em] text-[#f5f0e8]">Show section</h2></div><button type="button" onClick={() => setShowTabFilter(false)} className="rounded-lg p-2 text-[#8c9697]"><X size={18} /></button></div>
+            <div className="mt-4 space-y-2">{tabs.map((item) => <button key={item} type="button" onClick={() => { setTab(item); setShowTabFilter(false); }} className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-[11px] font-bold ${tab === item ? "border-[#ff5a1f] bg-[#ff5a1f]/10 text-[#ff7040]" : "border-[#343e42] bg-[#121719] text-[#c4ccc9]"}`}>{item}{tab === item && <ShieldCheck size={14} />}</button>)}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function EliteEsportsHome() {
   const [filter, setFilter] = useState<Filter>("All");
   const [joined, setJoined] = useState<number[]>([]);
@@ -665,30 +789,13 @@ export function EliteEsportsHome() {
         </header>
 
         <main className="px-4 pb-28 pt-5">
-          {profilePage ? (
-            <ProfileScreen
-              page={profilePage}
-              onBack={() => setProfilePage(null)}
-              onNavigate={setProfilePage}
-              onToast={setToast}
+          {selectedMatch ? (
+            <MatchDetails
+              match={selectedMatch}
+              joined={joined.includes(selectedMatch.id)}
+              onBack={() => setSelectedMatch(null)}
+              onJoin={handleJoin}
             />
-          ) : selectedMatch ? (
-            <div>
-              <button type="button" onClick={() => setSelectedMatch(null)} className="mb-5 flex items-center gap-1 text-[11px] font-bold text-[#aab3b2]"><ChevronLeft size={16} /> Back to matches</button>
-              <div className="flex items-start gap-3">
-                <div className="w-[112px] shrink-0"><MatchArtwork match={selectedMatch} /></div>
-                <div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#ff7040]">{selectedMatch.game} · {selectedMatch.mode}</p><h1 className="mt-1.5 text-[22px] font-extrabold leading-6 tracking-[-0.05em] text-[#f5f0e9]">{selectedMatch.title}</h1><p className="mt-2 flex items-center gap-1.5 text-[10px] text-[#8d999b]"><CalendarDays size={12} />{selectedMatch.time}</p></div>
-              </div>
-              <button type="button" onClick={() => handleJoin(selectedMatch)} className={`mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[12px] font-bold ${joined.includes(selectedMatch.id) ? "bg-[#d8efdd] text-[#17442d]" : "bg-[#ff5a1f] text-[#1a120e]"}`}>{joined.includes(selectedMatch.id) ? <ShieldCheck size={15} /> : <Zap size={15} />}{joined.includes(selectedMatch.id) ? "Spot reserved" : `Join for ₹${selectedMatch.entry}`}</button>
-              <section className="mt-6 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4">
-                <h2 className="text-[14px] font-bold text-[#f2ece4]">Match overview</h2>
-                <div className="mt-4 grid grid-cols-3 gap-2 border-y border-[#2a3034] py-3"><div><p className="text-[8px] uppercase tracking-[0.08em] text-[#747f83]">Prize pool</p><p className="mt-1 text-[14px] font-bold text-[#efb24f]"><Money value={selectedMatch.prize} /></p></div><div><p className="text-[8px] uppercase tracking-[0.08em] text-[#747f83]">Joined</p><p className="mt-1 text-[14px] font-bold text-[#f3ede5]">{selectedMatch.filled}/{selectedMatch.total}</p></div><div><p className="text-[8px] uppercase tracking-[0.08em] text-[#747f83]">Per kill</p><p className="mt-1 text-[14px] font-bold text-[#f3ede5]">₹40</p></div></div>
-                <div className="mt-4 flex items-center justify-between"><h2 className="text-[14px] font-bold text-[#f2ece4]">Joined members</h2><span className="text-[10px] text-[#7f8b8e]">{selectedMatch.filled} players</span></div>
-                <div className="mt-3 flex -space-x-2">{["AK", "MO", "RS", "CG", "SP", "VN"].map((initials) => <span key={initials} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#171c1f] bg-[#334044] text-[8px] font-bold text-[#dce3df]">{initials}</span>)}<span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#171c1f] bg-[#ff5a1f] text-[8px] font-bold text-[#1a120e]">+30</span></div>
-              </section>
-              <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4"><h2 className="text-[14px] font-bold text-[#f2ece4]">Prize distribution</h2><div className="mt-3 space-y-2">{[["1st place", "₹900"], ["2nd place", "₹540"], ["Kill rewards", "₹360"]].map(([label, amount]) => <div key={label} className="flex justify-between rounded-xl bg-[#131719] px-3 py-2.5 text-[11px]"><span className="text-[#aab3b2]">{label}</span><strong className="text-[#efb24f]">{amount}</strong></div>)}</div></section>
-              <section className="mt-3 rounded-[21px] border border-[#2b3236] bg-[#171c1f] p-4"><div className="flex items-center gap-2"><CircleHelp size={15} className="text-[#ff7040]" /><h2 className="text-[14px] font-bold text-[#f2ece4]">Rules</h2></div><p className="mt-3 text-[11px] leading-5 text-[#9ca6a6]">Room ID and password are shared 10 minutes before start. No teaming, emulators, or modified clients. Top placements are paid to your Elite wallet within 30 minutes.</p><div className="mt-3 flex items-center gap-2 rounded-xl bg-[#1f2b24] p-3 text-[10px] text-[#a9c8b0]"><LockKeyhole size={14} />Fair play is monitored in every room.</div></section>
-            </div>
           ) : activeNav === "Wallet" ? (
             <WalletPage />
           ) : activeNav === "Leaderboard" ? (
@@ -718,6 +825,43 @@ export function EliteEsportsHome() {
             </div>
           )}
         </main>
+
+        {profilePage && (
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-[#07090a]/72 backdrop-blur-[2px]"
+            onClick={() => setProfilePage(null)}
+          >
+            <aside
+              role="dialog"
+              aria-label="Profile menu"
+              className="h-full w-[min(92vw,390px)] overflow-hidden border-l border-[#343e42] bg-[#121719] shadow-[-18px_0_45px_rgba(0,0,0,0.35)]"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex h-[72px] items-center justify-between border-b border-[#293034] px-5">
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#ff7040]">PLAYER MENU</p>
+                  <p className="mt-1 text-[13px] font-bold text-[#eee8df]">Rohan Shah</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setProfilePage(null)}
+                  aria-label="Close profile menu"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#343e42] text-[#8d989a] hover:bg-[#20282b] hover:text-white"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+              <div className="h-[calc(100%-72px)] overflow-y-auto px-4 pb-8 pt-5">
+                <ProfileScreen
+                  page={profilePage}
+                  onBack={() => setProfilePage(null)}
+                  onNavigate={setProfilePage}
+                  onToast={setToast}
+                />
+              </div>
+            </aside>
+          </div>
+        )}
 
         <nav className="fixed bottom-0 left-1/2 z-20 flex h-[76px] w-full max-w-[430px] -translate-x-1/2 items-start border-t border-[#292f33] bg-[#121719]/95 px-3 pt-3 backdrop-blur-xl">
           {[{ label: "Home" as Page, icon: Home }, { label: "Matches" as Page, icon: Trophy }, { label: "Wallet" as Page, icon: WalletCards }, { label: "Leaderboard" as Page, icon: LayoutGrid }].map(({ label, icon: Icon }) => <button key={label} type="button" onClick={() => { setSelectedMatch(null); setActiveNav(label); }} className={`flex flex-1 flex-col items-center gap-1 text-[9px] font-bold transition ${activeNav === label && !selectedMatch ? "text-[#ff7040]" : "text-[#7d888b]"}`}><span className={`flex h-8 w-10 items-center justify-center rounded-xl ${activeNav === label && !selectedMatch ? "bg-[#ff5a1f]/12" : ""}`}><Icon size={18} strokeWidth={activeNav === label && !selectedMatch ? 2.4 : 1.8} /></span>{label}</button>)}
